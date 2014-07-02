@@ -1,6 +1,10 @@
 ##Structure##
-prev[col][row] //current iteration
-next[col][row] //next iteration
+struct {
+  state, //counted per iteration
+} cell
+
+cell[col][row] p_cycle //current iteration
+cell[col][row] n_cycle //next iteration
 
 !--only alive elements are stored--!
 
@@ -18,70 +22,38 @@ calculate it
     x  x |x|
 --!
 
-struct {
-  alive,
-  state, //counted per iteration
-  neighbours*
-} cell
-elem[x][y] // 3^2 block
-
 #Cell#
-when a cell is created, it checks its current neighbours
-and then becomes a child of all cell's within its block
-if they are alive.
--A added to inactive board
-  x
-A.parent = null
-A.children = null
--B added to inactive board
-  xx
-A.parent = null
-A.children = B
-B.parent = A
-B.children = null
--C added to inactive board
+==inital board==
+  ABC
   xxx
-A.parent = null
-A.children = B
-B.parent = A
-B.children = C
-C.parent = B
-C.children = null
--board becomes active
 ==traversal stage==
--A's children is read, which is B
--B's children is read, which is C
--C has no children, so traversal stops downwards
+-iterate list of alive cells in p_cycle.
+-iterate the block surrounding a cell.
+A00,A01,A02
+A10,A11,A12
+A20,A21,A22
 ==breeding stage==
-   ...
-  xxx.
-   ...
--C00 is found to have 3 neighbours: A,B,C
--C00 is born as a child of A,B,C as D
-D.parent = A,B,C
-D.children = null
-A.children = B,D
-B.children = C,D
-C.children = D
-//C01 through C22 do not have exactly 3 neighbours
-  ...
-  xxx
-  ...
--B00 does not have exactly 3 neighbours
--B01 has a true status, meaning it has been read,
-and is skipped
--the rest of B's block has been skipped or does not have
-enough neighbours to replicate
+-for each cell in the block, count the
+surrounding cells for any other alive cells.
+-if a surrounding cell does not exist in p_cycle it is
+assumed to not exist.
+-if status is true, return the value without counting.
+-if count is exactly 3, the cell is copied to n_cycle.
+-set sttus to true on p_cycle.
+-return the count.
+-----------
  ...
  .xxx
  ...
--A goes through the same process as B just did
+-----------
+  ...
+  xxx
+  ...
+-----------
+   ...
+  xxx.
+   ...
 ==survival stage==
--C has 1 parent and 0 children, a total of 1
--C dies
--B has 1 parent and 1 children, a total of 2
--B lives
--A has 0 parent and 1 children, a total of 1
--A dies
-
-##Render##
+-if the count is not exactly 2, the cell dies and nothing
+is copied to n_cycle.
+##Render#

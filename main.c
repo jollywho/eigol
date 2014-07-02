@@ -3,8 +3,13 @@
 #include <unistd.h>
 #include <time.h>
 #include "locale.h"
+#include "stdlib.h"
 
-#define DELAY 30000
+typedef struct cell {
+  bool status;
+} cell;
+cell** p_cycle;
+cell** n_cycle;
 int ch;
 char str[3] = "░";
 char str2[3] = "▒";
@@ -51,6 +56,13 @@ int main(int argc, char** argv)
   noecho();
   keypad(stdscr, TRUE);
 
+  p_cycle = (cell**)malloc(row * sizeof(cell*));
+  n_cycle = (cell**)malloc(row * sizeof(cell*));
+  for (int i=0;i<col;i++)
+  {
+    p_cycle[i] = (cell*)malloc(col * sizeof(cell*));
+    n_cycle[i] = (cell*)malloc(col * sizeof(cell*));
+  }
   int q = 1;
   while(1)
   {
@@ -62,6 +74,11 @@ int main(int argc, char** argv)
     usleep(500000);
     refresh();
     q *= -1;
+  }
+  for (int i=0;i<row;i++)
+  {
+    free(p_cycle[i]);
+    free(n_cycle[i]);
   }
   clear();
   endwin();
