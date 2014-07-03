@@ -6,40 +6,68 @@
 #include "stdlib.h"
 
 typedef struct cell {
+  bool alive;
   bool status;
 } cell;
-cell** p_cycle;
-cell** n_cycle;
+cell** cells;
 int ch;
 char str[3] = "░";
 char str2[3] = "▒";
 int col = 0;
 int row = 0;
 
-void draw(int q)
+void countblock(int r, int c)
 {
-  clear();
-  int x,y = 0;
-  for (int c=0; c<row; c++)
+  attron(COLOR_PAIR(1));
+  mvprintw(r,c, "%s", "░");
+  for (int i=r-1; i<r+2; i++)
+    for (int j=c-1; j<c+2; j++)
   {
-    x=0;
-    for (int r=0; r<col; r++)
-    {
-      if (q == -1)
+    if (i >= 0 && j >= 0 &&
+        i <= row && j <= col)
+      if (!cells[i][j].alive)
       {
-         attron(COLOR_PAIR(1));
-         mvprintw(y,x, "%s", str2);
-
+        fprintf(stderr, "%d, %d\n", i,j);
+        attron(COLOR_PAIR(2));
+        mvprintw(i,j, "%s", ":");
       }
-      if (q == 1)
-      {
-         attron(COLOR_PAIR(2));
-        mvprintw(y,x, "%s", str);
-      }
-      x++;
-    }
-    y++;
   }
+  return;
+}
+
+void draw()
+{
+  for (int i=0; i<row; i++)
+  {
+    for (int j=0; j<col; j++)
+    {
+      if (cells[i][j].alive)
+      {
+        fprintf(stderr, "------\n", i,j);
+        countblock(i,j);
+      }
+    }
+  }
+}
+
+void reset()
+{
+  for (int i=0;i<row;i++)
+  {
+    for (int j=0;j<col;j++)
+      cells[i][j].status = false;
+  }
+  return;
+}
+
+void create()
+{
+  cells = (cell**)malloc(row * sizeof(cell*));
+  for (int i=0;i<row;i++)
+  {
+    cells[i] = (cell*)malloc(col * sizeof(cell));
+  }
+  return;
 }
 
 int main(int argc, char** argv)
@@ -51,35 +79,27 @@ int main(int argc, char** argv)
   start_color();
   use_default_colors();
   init_pair(1, COLOR_BLACK, COLOR_RED);
-  init_pair(2, COLOR_BLACK, COLOR_GREEN);
+  init_pair(2, COLOR_BLACK, COLOR_CYAN);
   cbreak();
   noecho();
   keypad(stdscr, TRUE);
 
-  p_cycle = (cell**)malloc(row * sizeof(cell*));
-  n_cycle = (cell**)malloc(row * sizeof(cell*));
-  for (int i=0;i<col;i++)
-  {
-    p_cycle[i] = (cell*)malloc(col * sizeof(cell*));
-    n_cycle[i] = (cell*)malloc(col * sizeof(cell*));
-  }
-  int q = 1;
+  fprintf(stderr, "row, col %d, %d\n", row, col);
+  create();
+  reset();
+  cells[35][35].alive = true;
   while(1)
   {
     clock_t start = clock(), diff;
-    draw(q);
+    draw();
     diff = clock() - start;
-    fprintf(stderr, "%ju\n", diff);
-    if (diff < 500000)
-    usleep(500000);
+    if (diff < 600000)
+      usleep(600000);
     refresh();
-    q *= -1;
   }
   for (int i=0;i<row;i++)
-  {
-    free(p_cycle[i]);
-    free(n_cycle[i]);
-  }
+    free(cells[i]);
+
   clear();
   endwin();
   return 0;
