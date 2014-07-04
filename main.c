@@ -16,23 +16,30 @@ char str2[3] = "▒";
 int col = 0;
 int row = 0;
 
-void countblock(int r, int c)
+int countblock(int r, int c, bool top)
 {
-  attron(COLOR_PAIR(1));
-  mvprintw(r,c, "%s", "░");
+  int count = 0;
   for (int i=r-1; i<r+2; i++)
     for (int j=c-1; j<c+2; j++)
   {
     if (i >= 0 && j >= 0 &&
-        i <= row && j <= col)
+        i < row && j < col)
+    {
       if (!cells[i][j].alive)
       {
-        fprintf(stderr, "%d, %d\n", i,j);
-        attron(COLOR_PAIR(2));
-        mvprintw(i,j, "%s", ":");
+        if (!cells[i][j].status && top)
+        {
+          cells[i][j].status = true;
+          attron(COLOR_PAIR(2));
+          if (countblock(i,j,false) == 3)
+            cells[i][j].alive = true;
+        }
       }
+      else
+        count++;
+    }
   }
-  return;
+  return count-1;
 }
 
 void draw()
@@ -42,9 +49,12 @@ void draw()
     for (int j=0; j<col; j++)
     {
       if (cells[i][j].alive)
-      {
-        fprintf(stderr, "------\n", i,j);
-        countblock(i,j);
+        {
+          int b = countblock(i,j,true);
+          if (b == 2 || b == 3)
+            mvprintw(i,j, "%s", "x");
+          else
+            cells[i][j].alive = false;
       }
     }
   }
@@ -87,6 +97,8 @@ int main(int argc, char** argv)
   fprintf(stderr, "row, col %d, %d\n", row, col);
   create();
   reset();
+  cells[35][33].alive = true;
+  cells[35][34].alive = true;
   cells[35][35].alive = true;
   while(1)
   {
@@ -96,6 +108,8 @@ int main(int argc, char** argv)
     if (diff < 600000)
       usleep(600000);
     refresh();
+    reset();
+    fprintf(stderr, "==============\n");
   }
   for (int i=0;i<row;i++)
     free(cells[i]);
