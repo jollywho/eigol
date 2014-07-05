@@ -1,0 +1,14 @@
+x | xx
+  | xx
+  | xx
+  | xx
+------
+x | xx
+  | x
+  |  x
+  |
+------
+scan block
+  set bit 0 or 1 if alive
+print braile type on x,y
+jump to next group of 2x4

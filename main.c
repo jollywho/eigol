@@ -4,20 +4,49 @@
 #include <time.h>
 #include "locale.h"
 #include "stdlib.h"
+#include "uthash.h"
 
 typedef struct cell {
   bool alive;
   bool status;
+  bool brailled;
+  char bit[8];
 } cell;
 cell** c_cycle;
 cell** n_cycle;
-int ch;
-char str[3] = "░";
-char str2[3] = "▒";
 int col = 0;
 int row = 0;
 
-int countblock(int r, int c, bool top)
+struct my_struct {
+    char id[8];
+    char name[50];
+    UT_hash_handle hh; /* makes this structure hashable */
+};
+
+struct my_struct *users = NULL;
+
+void add_user(char* user_id, int* name) {
+    struct my_struct *s;
+
+    s = (struct my_struct*)malloc(sizeof(struct my_struct));
+    strcpy(s->id, user_id);
+    strcpy(s->name, name);
+    HASH_ADD_INT( users, id, s ); /* id: name of key field */
+}
+
+struct my_struct *find_user(char* user_id) {
+    struct my_struct *s;
+
+    HASH_FIND_INT( users, user_id, s );
+    return s;
+}
+
+void gen_table()
+{
+#include "table.h"
+}
+
+int countblock_alive(int r, int c)
 {
   int count = 0;
   for (int i=r-1; i<r+2; i++)
@@ -28,16 +57,32 @@ int countblock(int r, int c, bool top)
     {
       if (!c_cycle[i][j].alive)
       {
-        if (!n_cycle[i][j].status && top)
+        if (!n_cycle[i][j].status)
         {
           attron(COLOR_PAIR(2));
-          if (countblock(i,j,false) == 2)
+          if (countblock_dead(i,j) == 2)
           {
             n_cycle[i][j].alive = true;
           }
         }
       }
       else
+        count++;
+    }
+  }
+  return count-1;
+}
+
+int countblock_dead(int r, int c)
+{
+  int count = 0;
+  for (int i=r-1; i<r+2; i++)
+    for (int j=c-1; j<c+2; j++)
+  {
+    if (i >= 0 && j >= 0 &&
+        i < row && j < col)
+    {
+      if (c_cycle[i][j].alive)
         count++;
     }
   }
@@ -52,11 +97,40 @@ void draw()
     {
       if (c_cycle[i][j].alive)
         {
-          int b = countblock(i,j,true);
-          mvprintw(i,j, "%s", "░");
+          int b = countblock_alive(i,j);
+          mvprintw(i,j, "%ls",find_user(c_cycle[i][j].bit)->name);
           if (b == 3 || b == 2)
             n_cycle[i][j].alive = true;
       }
+    }
+  }
+}
+
+void set_braille_nodes(int r, int c, cell* cj)
+{
+  int bit = 0;
+  for (int i=r; i<r+4; i++)
+    for (int j=c; j<c+2; j++)
+  {
+    if (i >= 0 && j >= 0 &&
+        i < row && j < col)
+    {
+      if (c_cycle[i][j].alive)
+        cj->bit[bit] = '1';
+    }
+    cj->brailled = true;
+    bit++;
+  }
+}
+
+void braillify()
+{
+  for (int i=0;i<row;i++)
+  {
+    for (int j=0;j<col;j++)
+    {
+      if (!c_cycle[i][j].brailled)
+        set_braille_nodes(i,j, &c_cycle[i][j]);
     }
   }
 }
@@ -80,7 +154,13 @@ void reset_cycle()
     for (int j=0;j<col;j++)
     {
       n_cycle[i][j].alive = false;
+      n_cycle[i][j].brailled = false;
       n_cycle[i][j].status = false;
+      for (int n=0; n<8; n++)
+      {
+        n_cycle[i][j].bit[n] = '0';
+        c_cycle[i][j].bit[n] = '0';
+      }
     }
   }
   return;
@@ -113,22 +193,25 @@ int main(int argc, char** argv)
   keypad(stdscr, TRUE);
 
   fprintf(stderr, "row, col %d, %d\n", row, col);
+  gen_table();
   create();
   reset_cycle();
+  for (int i=0;i<row/2*col/2;i++)
+  {
+    int q = rand() % row;
+    int f = rand() % col;
+    c_cycle[q][f].alive = true;
+  }
 
-  c_cycle[35][35].alive = true;
-  c_cycle[35][34].alive = true;
-  c_cycle[35][33].alive = true;
-  c_cycle[34][35].alive = true;
-  c_cycle[33][34].alive = true;
   while(1)
   {
     clock_t start = clock(), diff;
     clear();
+    braillify();
     draw();
     diff = clock() - start;
-    if (diff < 600000)
-      usleep(600000);
+    if (diff < 800000)
+      usleep(800000);
     refresh();
     copy_cycle();
     reset_cycle();
