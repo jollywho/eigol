@@ -9,7 +9,8 @@ typedef struct cell {
   bool alive;
   bool status;
 } cell;
-cell** cells;
+cell** c_cycle;
+cell** n_cycle;
 int ch;
 char str[3] = "░";
 char str2[3] = "▒";
@@ -25,21 +26,25 @@ int countblock(int r, int c, bool top)
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
-      if (!cells[i][j].alive)
+      if (!c_cycle[i][j].alive)
       {
-        if (!cells[i][j].status && top)
+        if (!n_cycle[i][j].status && top)
         {
-          cells[i][j].status = true;
+          n_cycle[i][j].status = true;
           attron(COLOR_PAIR(2));
+          mvprintw(i,j, "%s", "$");
           if (countblock(i,j,false) == 3)
-            cells[i][j].alive = true;
+          {
+            mvprintw(i,j, "%s", "@");
+            n_cycle[i][j].alive = true;
+          }
         }
       }
       else
         count++;
     }
   }
-  return count-1;
+  return count;
 }
 
 void draw()
@@ -48,34 +53,45 @@ void draw()
   {
     for (int j=0; j<col; j++)
     {
-      if (cells[i][j].alive)
+      if (c_cycle[i][j].alive)
         {
           int b = countblock(i,j,true);
+          mvprintw(i,j, "%s", "x");
           if (b == 2 || b == 3)
-            mvprintw(i,j, "%s", "x");
-          else
-            cells[i][j].alive = false;
+            n_cycle[i][j].alive = true;
       }
     }
   }
 }
 
-void reset()
+void generation(cell** old, cell** new)
+{
+  cell* temp = *old;
+  *new = *old;
+  *old = temp;
+}
+
+void reset_cycle()
 {
   for (int i=0;i<row;i++)
   {
     for (int j=0;j<col;j++)
-      cells[i][j].status = false;
+    {
+      n_cycle[i][j].alive = false;
+      n_cycle[i][j].status = false;
+    }
   }
   return;
 }
 
 void create()
 {
-  cells = (cell**)malloc(row * sizeof(cell*));
+  c_cycle = (cell**)malloc(row * sizeof(cell*));
+  n_cycle = (cell**)malloc(row * sizeof(cell*));
   for (int i=0;i<row;i++)
   {
-    cells[i] = (cell*)malloc(col * sizeof(cell));
+    c_cycle[i] = (cell*)malloc(col * sizeof(cell));
+    n_cycle[i] = (cell*)malloc(col * sizeof(cell));
   }
   return;
 }
@@ -96,10 +112,9 @@ int main(int argc, char** argv)
 
   fprintf(stderr, "row, col %d, %d\n", row, col);
   create();
-  reset();
-  cells[35][33].alive = true;
-  cells[35][34].alive = true;
-  cells[35][35].alive = true;
+  c_cycle[35][33].alive = true;
+  c_cycle[35][34].alive = true;
+  c_cycle[35][35].alive = true;
   while(1)
   {
     clock_t start = clock(), diff;
@@ -108,11 +123,15 @@ int main(int argc, char** argv)
     if (diff < 600000)
       usleep(600000);
     refresh();
-    reset();
+    generation(n_cycle, c_cycle);
+    reset_cycle();
     fprintf(stderr, "==============\n");
   }
   for (int i=0;i<row;i++)
-    free(cells[i]);
+  {
+    free(c_cycle[i]);
+    free(c_cycle[i]);
+  }
 
   clear();
   endwin();
