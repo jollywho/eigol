@@ -30,12 +30,9 @@ int countblock(int r, int c, bool top)
       {
         if (!n_cycle[i][j].status && top)
         {
-          n_cycle[i][j].status = true;
           attron(COLOR_PAIR(2));
-          mvprintw(i,j, "%s", "$");
-          if (countblock(i,j,false) == 3)
+          if (countblock(i,j,false) == 2)
           {
-            mvprintw(i,j, "%s", "@");
             n_cycle[i][j].alive = true;
           }
         }
@@ -44,7 +41,7 @@ int countblock(int r, int c, bool top)
         count++;
     }
   }
-  return count;
+  return count-1;
 }
 
 void draw()
@@ -56,19 +53,24 @@ void draw()
       if (c_cycle[i][j].alive)
         {
           int b = countblock(i,j,true);
-          mvprintw(i,j, "%s", "x");
-          if (b == 2 || b == 3)
+          mvprintw(i,j, "%s", "░");
+          if (b == 3 || b == 2)
             n_cycle[i][j].alive = true;
       }
     }
   }
 }
 
-void generation(cell** old, cell** new)
+void copy_cycle()
 {
-  cell* temp = *old;
-  *new = *old;
-  *old = temp;
+  for (int i=0;i<row;i++)
+  {
+    for (int j=0;j<col;j++)
+    {
+      c_cycle[i][j].alive = n_cycle[i][j].alive;
+      c_cycle[i][j].status = n_cycle[i][j].status;
+    }
+  }
 }
 
 void reset_cycle()
@@ -112,18 +114,23 @@ int main(int argc, char** argv)
 
   fprintf(stderr, "row, col %d, %d\n", row, col);
   create();
-  c_cycle[35][33].alive = true;
-  c_cycle[35][34].alive = true;
+  reset_cycle();
+
   c_cycle[35][35].alive = true;
+  c_cycle[35][34].alive = true;
+  c_cycle[35][33].alive = true;
+  c_cycle[34][35].alive = true;
+  c_cycle[33][34].alive = true;
   while(1)
   {
     clock_t start = clock(), diff;
+    clear();
     draw();
     diff = clock() - start;
     if (diff < 600000)
       usleep(600000);
     refresh();
-    generation(n_cycle, c_cycle);
+    copy_cycle();
     reset_cycle();
     fprintf(stderr, "==============\n");
   }
