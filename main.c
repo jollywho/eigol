@@ -77,7 +77,6 @@ int countblock_alive(int r, int c)
       {
         if (!n_cycle[i][j].status)
         {
-          attron(COLOR_PAIR(2));
           if (countblock_dead(i,j) == 2)
           {
             n_cycle[i][j].alive = true;
@@ -100,8 +99,8 @@ void draw()
       if (c_cycle[i][j].alive)
       {
         int b = countblock_alive(i,j);
-        if (c_cycle[i][j].root)
-          mvprintw(i,j, "%ls",find_user(c_cycle[i][j].bit)->name);
+         // mvprintw(i/4,j/2, "%ls",find_user(c_cycle[i][j].bit)->name);
+          mvprintw(i/4,j/2, "%s"," ");
         if (b == 3 || b == 2)
           n_cycle[i][j].alive = true;
       }
@@ -109,17 +108,29 @@ void draw()
   }
 }
 
+void clrscr()
+{
+  for (int i=0; i<row; i++)
+  {
+    for (int j=0; j<col; j++)
+    {
+        attron(COLOR_PAIR(1));
+        mvprintw(i/4,j/2, "%s"," ");
+        attroff(COLOR_PAIR(1));
+    }
+  }
+}
+
 void set_braille_nodes(int r, int c, cell* cj)
 {
   int bit = 0;
-  for (int i=r; i<r+4; i++)
-    for (int j=c; j<c+2; j++)
+  c_cycle[r][c].root = true;
+  for (int i=r; i<r+2; i++)
+    for (int j=c; j<c+4; j++)
   {
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
-      if (i==r && j==c)
-        c_cycle[i][j].root = true;
       if (c_cycle[i][j].alive)
         cj->bit[bit] = '1';
       c_cycle[i][j].brailled = true;
@@ -186,6 +197,12 @@ void create()
   return;
 }
 
+//todo:
+//braille groupings means there can be many more cells
+//col can extend x2 and row x4
+//0-40 & 0-80
+//0-80 & 0-3207
+//i,j becomes |i/2|, |j/4|
 int main(int argc, char** argv)
 {
   setlocale(LC_ALL, "");
@@ -200,26 +217,28 @@ int main(int argc, char** argv)
   noecho();
   keypad(stdscr, TRUE);
 
+  row*=4;
+  col*=2;
   fprintf(stderr, "row, col %d, %d\n", row, col);
   gen_table();
   create();
   reset_cycle();
-  for (int i=0;i<row/2*col/2;i++)
-  {
-    int q = rand() % row;
-    int f = rand() % col;
-    c_cycle[q][f].alive = true;
-  }
+  //for (int i=0;i<row/2*col/2;i++)
+  //{
+  //  int q = rand() % row;
+  //  int f = rand() % col;
+  //  c_cycle[q][f].alive = true;
+  //}
+  for (int i=0;i<row;i++)
+    c_cycle[i][0].alive = true;
 
   while(1)
   {
     clock_t start = clock(), diff;
-    clear();
     braillify();
+    clrscr();
     draw();
     diff = clock() - start;
-    if (diff < 800000)
-      usleep(800000);
     refresh();
     copy_cycle();
     reset_cycle();
