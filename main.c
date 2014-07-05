@@ -2,6 +2,7 @@
 #include "ncurses.h"
 #include <unistd.h>
 #include <time.h>
+#include <wchar.h>
 #include "locale.h"
 #include "stdlib.h"
 #include "uthash.h"
@@ -19,19 +20,19 @@ int row = 0;
 
 struct my_struct {
     char id[8];
-    char name[50];
-    UT_hash_handle hh; /* makes this structure hashable */
+    wchar_t name[50];
+    UT_hash_handle hh;
 };
 
 struct my_struct *users = NULL;
 
-void add_user(char* user_id, int* name) {
+void add_user(char* user_id, wchar_t* name) {
     struct my_struct *s;
 
     s = (struct my_struct*)malloc(sizeof(struct my_struct));
-    strcpy(s->id, user_id);
-    strcpy(s->name, name);
-    HASH_ADD_INT( users, id, s ); /* id: name of key field */
+    strncpy(s->id, user_id,8);
+    wcsncpy(s->name, name,50);
+    HASH_ADD_INT( users, id, s );
 }
 
 struct my_struct *find_user(char* user_id) {
@@ -44,6 +45,22 @@ struct my_struct *find_user(char* user_id) {
 void gen_table()
 {
 #include "table.h"
+}
+
+int countblock_dead(int r, int c)
+{
+  int count = 0;
+  for (int i=r-1; i<r+2; i++)
+    for (int j=c-1; j<c+2; j++)
+  {
+    if (i >= 0 && j >= 0 &&
+        i < row && j < col)
+    {
+      if (c_cycle[i][j].alive)
+        count++;
+    }
+  }
+  return count-1;
 }
 
 int countblock_alive(int r, int c)
@@ -67,22 +84,6 @@ int countblock_alive(int r, int c)
         }
       }
       else
-        count++;
-    }
-  }
-  return count-1;
-}
-
-int countblock_dead(int r, int c)
-{
-  int count = 0;
-  for (int i=r-1; i<r+2; i++)
-    for (int j=c-1; j<c+2; j++)
-  {
-    if (i >= 0 && j >= 0 &&
-        i < row && j < col)
-    {
-      if (c_cycle[i][j].alive)
         count++;
     }
   }
