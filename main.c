@@ -10,6 +10,7 @@
 typedef struct cell {
   bool alive;
   bool status;
+  bool root;
   bool brailled;
   char bit[8];
 } cell;
@@ -97,11 +98,12 @@ void draw()
     for (int j=0; j<col; j++)
     {
       if (c_cycle[i][j].alive)
-        {
-          int b = countblock_alive(i,j);
+      {
+        int b = countblock_alive(i,j);
+        if (c_cycle[i][j].root)
           mvprintw(i,j, "%ls",find_user(c_cycle[i][j].bit)->name);
-          if (b == 3 || b == 2)
-            n_cycle[i][j].alive = true;
+        if (b == 3 || b == 2)
+          n_cycle[i][j].alive = true;
       }
     }
   }
@@ -116,10 +118,12 @@ void set_braille_nodes(int r, int c, cell* cj)
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
+      if (i==r && j==c)
+        c_cycle[i][j].root = true;
       if (c_cycle[i][j].alive)
         cj->bit[bit] = '1';
+      c_cycle[i][j].brailled = true;
     }
-    cj->brailled = true;
     bit++;
   }
 }
@@ -131,7 +135,9 @@ void braillify()
     for (int j=0;j<col;j++)
     {
       if (!c_cycle[i][j].brailled)
+      { 
         set_braille_nodes(i,j, &c_cycle[i][j]);
+      }
     }
   }
 }
@@ -155,6 +161,7 @@ void reset_cycle()
     for (int j=0;j<col;j++)
     {
       n_cycle[i][j].alive = false;
+      n_cycle[i][j].root = false;
       n_cycle[i][j].brailled = false;
       n_cycle[i][j].status = false;
       for (int n=0; n<8; n++)
