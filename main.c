@@ -100,7 +100,9 @@ void draw()
       {
         int b = countblock_alive(i,j);
          // mvprintw(i/4,j/2, "%ls",find_user(c_cycle[i][j].bit)->name);
-          mvprintw(i/4,j/2, "%s"," ");
+        attron(COLOR_PAIR(2));
+        mvprintw(i/4,j/2, "%s"," ");
+        attroff(COLOR_PAIR(2));
         if (b == 3 || b == 2)
           n_cycle[i][j].alive = true;
       }
@@ -114,9 +116,7 @@ void clrscr()
   {
     for (int j=0; j<col; j++)
     {
-        attron(COLOR_PAIR(1));
-        mvprintw(i/4,j/2, "%s"," ");
-        attroff(COLOR_PAIR(1));
+      mvprintw(i/4,j/2, "%s"," ");
     }
   }
 }
@@ -223,14 +223,14 @@ int main(int argc, char** argv)
   gen_table();
   create();
   reset_cycle();
-  //for (int i=0;i<row/2*col/2;i++)
-  //{
-  //  int q = rand() % row;
-  //  int f = rand() % col;
-  //  c_cycle[q][f].alive = true;
-  //}
+  for (int i=0;i<row/2*col/2;i++)
+  {
+    int q = rand() % row;
+    int f = rand() % col;
+    c_cycle[q][f].alive = true;
+  }
   for (int i=0;i<row;i++)
-    c_cycle[i][0].alive = true;
+    c_cycle[i][i].alive = true;
 
   while(1)
   {
