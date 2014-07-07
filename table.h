@@ -5,7 +5,7 @@ add_user("10100000", L'\u2803');
 add_user("00001000", L'\u2804');
 add_user("10001000", L'\u2805');
 add_user("00101000", L'\u2806');
-add_user("00101010", L'\u2807');
+add_user("10101000", L'\u2807');
 add_user("01000000", L'\u2808');
 add_user("11000000", L'\u2809');
 add_user("01100000", L'\u280a');
@@ -14,7 +14,6 @@ add_user("01001000", L'\u280c');
 add_user("11001000", L'\u280d');
 add_user("01001000", L'\u280e');
 add_user("11101000", L'\u280f');
-
 add_user("00010000", L'\u2810');
 add_user("10010000", L'\u2811');
 add_user("00110000", L'\u2812');
@@ -31,7 +30,6 @@ add_user("01011000", L'\u281c');
 add_user("11011000", L'\u281d');
 add_user("01111000", L'\u281e');
 add_user("11111000", L'\u281f');
-
 add_user("00000100", L'\u2820');
 add_user("10000100", L'\u2821');
 add_user("00100100", L'\u2822');
@@ -48,7 +46,6 @@ add_user("01001100", L'\u282c');
 add_user("11001100", L'\u282d');
 add_user("01101100", L'\u282e');
 add_user("11101100", L'\u282f');
-
 add_user("00010100", L'\u2830');
 add_user("10010100", L'\u2831');
 add_user("00110100", L'\u2832');
@@ -65,7 +62,6 @@ add_user("01011100", L'\u283c');
 add_user("11011100", L'\u283d');
 add_user("01111100", L'\u283e');
 add_user("11111100", L'\u283f');
-
 add_user("00000010", L'\u2840');
 add_user("10000010", L'\u2841');
 add_user("00100010", L'\u2842');
@@ -80,9 +76,8 @@ add_user("01100010", L'\u284a');
 add_user("11100010", L'\u284b');
 add_user("01001010", L'\u284c');
 add_user("11001010", L'\u284d');
-add_user("01010101", L'\u284e');
+add_user("00001111", L'\u284e');
 add_user("11101010", L'\u284f');
-
 add_user("00010010", L'\u2850');
 add_user("10000110", L'\u2851');
 add_user("00110010", L'\u2852');
@@ -99,7 +94,6 @@ add_user("01011010", L'\u285c');
 add_user("11011010", L'\u285d');
 add_user("01111010", L'\u285e');
 add_user("11111010", L'\u285f');
-
 add_user("00000110", L'\u2860');
 add_user("10000110", L'\u2861');
 add_user("00100110", L'\u2862');
@@ -117,14 +111,14 @@ add_user("11001110", L'\u286d');
 add_user("01011100", L'\u286e');
 add_user("11101110", L'\u286f');
 
-//temp while no internet
-add_user("10101000", L'\u28ff');
-add_user("01101010", L'\u28ff');
 add_user("10110101", L'\u28ff');
 add_user("01111011", L'\u28ff');
 add_user("11001011", L'\u28ff');
-add_user("11110110", L'\u28ff');
 add_user("01110110", L'\u28ff');
+add_user("11010110", L'\u28ff');
+add_user("00101110", L'\u28ff');
+add_user("01101110", L'\u28ff');
+add_user("10001100", L'\u28ff');
 
 add_user("00010110", L'\u2870');
 add_user("10010110", L'\u2871');
@@ -137,12 +131,11 @@ add_user("10111110", L'\u2877');
 add_user("00111110", L'\u2878');
 add_user("10111110", L'\u2879');
 add_user("01010110", L'\u287a');
-add_user("11010110", L'\u287b');
+add_user("11110110", L'\u287b');
 add_user("01011110", L'\u287c');
 add_user("11011110", L'\u287d');
 add_user("01111110", L'\u287e');
 add_user("11111110", L'\u287f');
-
 add_user("00000001", L'\u2880');
 add_user("10000001", L'\u2881');
 add_user("00100001", L'\u2882');
@@ -159,7 +152,6 @@ add_user("01000101", L'\u288c');
 add_user("11000101", L'\u288d');
 add_user("01101001", L'\u288e');
 add_user("11101001", L'\u288f');
-
 add_user("00010001", L'\u2890');
 add_user("10010001", L'\u2891');
 add_user("00110001", L'\u2892');
@@ -176,7 +168,6 @@ add_user("01011001", L'\u289c');
 add_user("11011001", L'\u289d');
 add_user("01111001", L'\u289e');
 add_user("11111001", L'\u289f');
-
 add_user("00000101", L'\u28a0');
 add_user("10000101", L'\u28a1');
 add_user("00100101", L'\u28a2');
@@ -193,12 +184,11 @@ add_user("01001101", L'\u28ac');
 add_user("11001101", L'\u28ad');
 add_user("01101101", L'\u28ae');
 add_user("11101101", L'\u28af');
-
 add_user("00010101", L'\u28b0');
 add_user("10010101", L'\u28b1');
 add_user("00110101", L'\u28b2');
-add_user("00011101", L'\u28b3');
-add_user("10011101", L'\u28b4');
+add_user("10110101", L'\u28b3');
+add_user("00011101", L'\u28b4');
 add_user("10011101", L'\u28b5');
 add_user("00111101", L'\u28b6');
 add_user("10111101", L'\u28b7');
@@ -210,7 +200,6 @@ add_user("01011101", L'\u28bc');
 add_user("11011101", L'\u28bd');
 add_user("01111101", L'\u28be');
 add_user("11111101", L'\u28bf');
-
 add_user("00000011", L'\u28c0');
 add_user("10000011", L'\u28c1');
 add_user("00100011", L'\u28c2');
@@ -227,7 +216,6 @@ add_user("01001011", L'\u28cc');
 add_user("11000011", L'\u28cd');
 add_user("01101011", L'\u28ce');
 add_user("11101011", L'\u28cf');
-
 add_user("00010011", L'\u28d0');
 add_user("10010011", L'\u28d1');
 add_user("00110011", L'\u28d2');
@@ -244,12 +232,11 @@ add_user("01011011", L'\u28dc');
 add_user("11011011", L'\u28dd');
 add_user("01110011", L'\u28de');
 add_user("11111011", L'\u28df');
-
 add_user("00000111", L'\u28e0');
 add_user("10000111", L'\u28e1');
 add_user("00100111", L'\u28e2');
 add_user("10100111", L'\u28e3');
-add_user("00001111", L'\u28e4');
+add_user("01101010", L'\u28e4');
 add_user("10001111", L'\u28e5');
 add_user("00101111", L'\u28e6');
 add_user("10101111", L'\u28e7');
@@ -261,7 +248,6 @@ add_user("01001111", L'\u28ec');
 add_user("11001111", L'\u28ed');
 add_user("01101111", L'\u28ee');
 add_user("11101111", L'\u28ef');
-
 add_user("00010111", L'\u28f0');
 add_user("10010111", L'\u28f1');
 add_user("00110111", L'\u28f2');

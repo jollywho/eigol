@@ -251,15 +251,15 @@ int main(int argc, char** argv)
   gen_table();
   create();
 
-  for (int i=0;i<row/2*col/2;i++)
-  {
-    int q = rand() % row;
-    int f = rand() % col;
-    ccells[q][f].alive = true;
-  }
 
   while(1)
   {
+  for (int i=0;i<row;i++)
+  {
+    ccells[i][5].alive = true;
+    ccells[i][col/2].alive = true;
+    ccells[i][col-5].alive = true;
+  }
     reset_cycle();
     braillify();
     clrscr();
