@@ -7,20 +7,26 @@
 #include "stdlib.h"
 #include "uthash.h"
 
+typedef struct braille {
+  bool status;
+  char bit[8];
+} braille;
 typedef struct cell {
   bool alive;
   bool status;
-  bool root;
-  bool brailled;
-  char bit[8];
+  bool bstatus;
+  braille* bcell;
 } cell;
-cell** c_cycle;
-cell** n_cycle;
+cell** c_cells;
+cell** n_cells;
+braille** block;
 int col = 0;
 int row = 0;
+int bcol = 0;
+int brow = 0;
 
 struct my_struct {
-    char id[8];
+    char id[10];
     wchar_t name[50];
     UT_hash_handle hh;
 };
@@ -57,7 +63,7 @@ int countblock_dead(int r, int c)
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
-      if (c_cycle[i][j].alive)
+      if (c_cells[i][j].alive)
         count++;
     }
   }
@@ -73,13 +79,13 @@ int countblock_alive(int r, int c)
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
-      if (!c_cycle[i][j].alive)
+      if (!c_cells[i][j].alive)
       {
-        if (!n_cycle[i][j].status)
+        if (!n_cells[i][j].status)
         {
           if (countblock_dead(i,j) == 2)
           {
-            n_cycle[i][j].alive = true;
+            n_cells[i][j].alive = true;
           }
         }
       }
@@ -90,52 +96,69 @@ int countblock_alive(int r, int c)
   return count-1;
 }
 
-void draw()
+void update()
 {
   for (int i=0; i<row; i++)
   {
     for (int j=0; j<col; j++)
     {
-      if (c_cycle[i][j].alive)
+      if (c_cells[i][j].alive)
       {
         int b = countblock_alive(i,j);
-         // mvprintw(i/4,j/2, "%ls",find_user(c_cycle[i][j].bit)->name);
-        attron(COLOR_PAIR(2));
-        mvprintw(i/4,j/2, "%s"," ");
-        attroff(COLOR_PAIR(2));
         if (b == 3 || b == 2)
-          n_cycle[i][j].alive = true;
+          n_cells[i][j].alive = true;
       }
+    }
+  }
+}
+
+void draw()
+{
+  for (int i=0; i<brow; i++)
+  {
+    for (int j=0; j<bcol; j++)
+    {
+      attron(COLOR_PAIR(2));
+      if (block[i][j].status)
+        mvprintw(i,j, "%s","x");
+        //mvprintw(i,j, "%ls",find_user(block[i/4][j/2].bit)->name);
+      attroff(COLOR_PAIR(2));
     }
   }
 }
 
 void clrscr()
 {
-  for (int i=0; i<row; i++)
+  for (int i=0; i<brow; i++)
   {
-    for (int j=0; j<col; j++)
+    for (int j=0; j<bcol; j++)
     {
-      mvprintw(i/4,j/2, "%s"," ");
+      mvprintw(i,j, "%s"," ");
     }
   }
 }
 
-void set_braille_nodes(int r, int c, cell* cj)
+void set_braille_nodes(int r, int c)
 {
   int bit = 0;
-  c_cycle[r][c].root = true;
-  for (int i=r; i<r+2; i++)
-    for (int j=c; j<c+4; j++)
+  fprintf(stderr, "%d,%d\n",r, c);
+  for (int i=r; i<r+4; i++)
   {
-    if (i >= 0 && j >= 0 &&
-        i < row && j < col)
+    for (int j=c; j<c+2; j++)
     {
-      if (c_cycle[i][j].alive)
-        cj->bit[bit] = '1';
-      c_cycle[i][j].brailled = true;
+      if (i >= 0 && j >= 0 &&
+          i < row && j < col)
+      {
+        if (c_cells[i][j].alive)
+        {
+          fprintf(stderr, "bit %d :%d,%d\n",bit, r, c);
+          block[i][j].status = true;
+          block[i][j].bit[bit] = '1';
+        }
+        c_cells[i][j].bstatus = true;
+      }
+      bit++;
     }
-    bit++;
   }
 }
 
@@ -145,10 +168,7 @@ void braillify()
   {
     for (int j=0;j<col;j++)
     {
-      if (!c_cycle[i][j].brailled)
-      { 
-        set_braille_nodes(i,j, &c_cycle[i][j]);
-      }
+      set_braille_nodes(i,j);
     }
   }
 }
@@ -159,8 +179,8 @@ void copy_cycle()
   {
     for (int j=0;j<col;j++)
     {
-      c_cycle[i][j].alive = n_cycle[i][j].alive;
-      c_cycle[i][j].status = n_cycle[i][j].status;
+      c_cells[i][j].alive = n_cells[i][j].alive;
+      c_cells[i][j].status = n_cells[i][j].status;
     }
   }
 }
@@ -171,14 +191,19 @@ void reset_cycle()
   {
     for (int j=0;j<col;j++)
     {
-      n_cycle[i][j].alive = false;
-      n_cycle[i][j].root = false;
-      n_cycle[i][j].brailled = false;
-      n_cycle[i][j].status = false;
-      for (int n=0; n<8; n++)
+      n_cells[i][j].alive = false;
+      n_cells[i][j].status = false;
+      n_cells[i][j].bstatus = false;
+    }
+  }
+  for (int i=0;i<brow;i++)
+  {
+    for (int j=0;j<bcol;j++)
+    {
+      block[i][j].status = false;
+      for (int n=0;n<8; n++)
       {
-        n_cycle[i][j].bit[n] = '0';
-        c_cycle[i][j].bit[n] = '0';
+        block[i][j].bit[n] = '0';
       }
     }
   }
@@ -187,22 +212,19 @@ void reset_cycle()
 
 void create()
 {
-  c_cycle = (cell**)malloc(row * sizeof(cell*));
-  n_cycle = (cell**)malloc(row * sizeof(cell*));
+  c_cells = (cell**)malloc(row * sizeof(cell*));
+  n_cells = (cell**)malloc(row * sizeof(cell*));
+  block = (braille**)malloc(brow * sizeof(braille*));
   for (int i=0;i<row;i++)
   {
-    c_cycle[i] = (cell*)malloc(col * sizeof(cell));
-    n_cycle[i] = (cell*)malloc(col * sizeof(cell));
+    c_cells[i] = (cell*)malloc(col * sizeof(cell));
+    n_cells[i] = (cell*)malloc(col * sizeof(cell));
   }
+  for (int i=0;i<bcol;i++)
+    block[i] = (braille*)malloc(bcol * sizeof(braille));
   return;
 }
 
-//todo:
-//braille groupings means there can be many more cells
-//col can extend x2 and row x4
-//0-40 & 0-80
-//0-80 & 0-3207
-//i,j becomes |i/2|, |j/4|
 int main(int argc, char** argv)
 {
   setlocale(LC_ALL, "");
@@ -217,28 +239,24 @@ int main(int argc, char** argv)
   noecho();
   keypad(stdscr, TRUE);
 
+  brow = row;
+  bcol = col;
   row*=4;
   col*=2;
   fprintf(stderr, "row, col %d, %d\n", row, col);
   gen_table();
   create();
   reset_cycle();
-  for (int i=0;i<row/2*col/2;i++)
-  {
-    int q = rand() % row;
-    int f = rand() % col;
-    c_cycle[q][f].alive = true;
-  }
-  for (int i=0;i<row;i++)
-    c_cycle[i][i].alive = true;
+
+  //for (int i=0;i<row;i++)
+  //  c_cells[i][0].alive = true;
 
   while(1)
   {
-    clock_t start = clock(), diff;
-    braillify();
     clrscr();
+    braillify();
     draw();
-    diff = clock() - start;
+    update();
     refresh();
     copy_cycle();
     reset_cycle();
@@ -246,8 +264,8 @@ int main(int argc, char** argv)
   }
   for (int i=0;i<row;i++)
   {
-    free(c_cycle[i]);
-    free(c_cycle[i]);
+    free(c_cells[i]);
+    free(c_cells[i]);
   }
 
   clear();
