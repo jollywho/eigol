@@ -12,34 +12,34 @@ typedef struct cell {
   bool status;
   bool root;
   bool brailled;
-  char bit[8];
+  char bit[9];
 } cell;
-cell** c_cycle;
-cell** n_cycle;
+cell** ccells;
+cell** ncells;
 int col = 0;
 int row = 0;
 
 struct my_struct {
-    char id[8];
-    wchar_t name[50];
+    char* id;
+    wchar_t name;
     UT_hash_handle hh;
 };
 
 struct my_struct *users = NULL;
 
-void add_user(char* user_id, wchar_t* name) {
+void add_user(char* key, wchar_t value) {
     struct my_struct *s;
 
     s = (struct my_struct*)malloc(sizeof(struct my_struct));
-    strncpy(s->id, user_id,8);
-    wcsncpy(s->name, name,50);
-    HASH_ADD_INT( users, id, s );
+    s->id = strdup(key);
+    s->name = value;
+    HASH_ADD_KEYPTR(hh, users, s->id, strlen(s->id), s);
 }
 
-struct my_struct *find_user(char* user_id) {
+struct my_struct* find_user(char* key) {
     struct my_struct *s;
 
-    HASH_FIND_INT( users, user_id, s );
+    HASH_FIND_STR( users, key, s );
     return s;
 }
 
@@ -57,7 +57,7 @@ int countblock_dead(int r, int c)
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
-      if (c_cycle[i][j].alive)
+      if (ccells[i][j].alive)
         count++;
     }
   }
@@ -73,13 +73,13 @@ int countblock_alive(int r, int c)
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
-      if (!c_cycle[i][j].alive)
+      if (!ccells[i][j].alive)
       {
-        if (!n_cycle[i][j].status)
+        if (!ncells[i][j].status)
         {
           if (countblock_dead(i,j) == 2)
           {
-            n_cycle[i][j].alive = true;
+            ncells[i][j].alive = true;
           }
         }
       }
@@ -96,15 +96,17 @@ void draw()
   {
     for (int j=0; j<col; j++)
     {
-      if (c_cycle[i][j].alive)
+      if (ccells[i][j].root)
+        mvprintw(i/4,j/2, "%lc", find_user(ccells[i][j].bit)->name);
+
+      if (ccells[i][j].alive)
       {
         int b = countblock_alive(i,j);
-         // mvprintw(i/4,j/2, "%ls",find_user(c_cycle[i][j].bit)->name);
-        attron(COLOR_PAIR(2));
-        mvprintw(i/4,j/2, "%s"," ");
-        attroff(COLOR_PAIR(2));
+        //attron(COLOR_PAIR(2));
+        //mvprintw(i/4,j/2, "%s"," ");
+        //attroff(COLOR_PAIR(2));
         if (b == 3 || b == 2)
-          n_cycle[i][j].alive = true;
+          ncells[i][j].alive = true;
       }
     }
   }
@@ -121,19 +123,19 @@ void clrscr()
   }
 }
 
-void set_braille_nodes(int r, int c, cell* cj)
+void set_braille_nodes(int r, int c)
 {
   int bit = 0;
-  c_cycle[r][c].root = true;
+  ccells[r][c].root = true;
   for (int i=r; i<r+2; i++)
     for (int j=c; j<c+4; j++)
   {
     if (i >= 0 && j >= 0 &&
         i < row && j < col)
     {
-      if (c_cycle[i][j].alive)
-        cj->bit[bit] = '1';
-      c_cycle[i][j].brailled = true;
+      if (ccells[i][j].alive)
+        ccells[r][c].bit[bit] = '0';
+      ccells[i][j].brailled = true;
     }
     bit++;
   }
@@ -145,9 +147,9 @@ void braillify()
   {
     for (int j=0;j<col;j++)
     {
-      if (!c_cycle[i][j].brailled)
-      { 
-        set_braille_nodes(i,j, &c_cycle[i][j]);
+      if (!ccells[i][j].brailled)
+      {
+        set_braille_nodes(i,j);
       }
     }
   }
@@ -159,8 +161,8 @@ void copy_cycle()
   {
     for (int j=0;j<col;j++)
     {
-      c_cycle[i][j].alive = n_cycle[i][j].alive;
-      c_cycle[i][j].status = n_cycle[i][j].status;
+      ccells[i][j].alive = ncells[i][j].alive;
+      ccells[i][j].status = ncells[i][j].status;
     }
   }
 }
@@ -171,14 +173,14 @@ void reset_cycle()
   {
     for (int j=0;j<col;j++)
     {
-      n_cycle[i][j].alive = false;
-      n_cycle[i][j].root = false;
-      n_cycle[i][j].brailled = false;
-      n_cycle[i][j].status = false;
+      ncells[i][j].alive = false;
+      ncells[i][j].root = false;
+      ncells[i][j].brailled = false;
+      ncells[i][j].status = false;
       for (int n=0; n<8; n++)
       {
-        n_cycle[i][j].bit[n] = '0';
-        c_cycle[i][j].bit[n] = '0';
+        ncells[i][j].bit[n] = '1';
+        ccells[i][j].bit[n] = '1';
       }
     }
   }
@@ -187,22 +189,16 @@ void reset_cycle()
 
 void create()
 {
-  c_cycle = (cell**)malloc(row * sizeof(cell*));
-  n_cycle = (cell**)malloc(row * sizeof(cell*));
+  ccells = (cell**)malloc(row * sizeof(cell*));
+  ncells = (cell**)malloc(row * sizeof(cell*));
   for (int i=0;i<row;i++)
   {
-    c_cycle[i] = (cell*)malloc(col * sizeof(cell));
-    n_cycle[i] = (cell*)malloc(col * sizeof(cell));
+    ccells[i] = (cell*)malloc(col * sizeof(cell));
+    ncells[i] = (cell*)malloc(col * sizeof(cell));
   }
   return;
 }
 
-//todo:
-//braille groupings means there can be many more cells
-//col can extend x2 and row x4
-//0-40 & 0-80
-//0-80 & 0-3207
-//i,j becomes |i/2|, |j/4|
 int main(int argc, char** argv)
 {
   setlocale(LC_ALL, "");
@@ -222,32 +218,25 @@ int main(int argc, char** argv)
   fprintf(stderr, "row, col %d, %d\n", row, col);
   gen_table();
   create();
-  reset_cycle();
-  for (int i=0;i<row/2*col/2;i++)
-  {
-    int q = rand() % row;
-    int f = rand() % col;
-    c_cycle[q][f].alive = true;
-  }
+
   for (int i=0;i<row;i++)
-    c_cycle[i][i].alive = true;
+    for (int c=0;c<col;c++)
+      ccells[i][c].alive = true;
 
   while(1)
   {
-    clock_t start = clock(), diff;
+    reset_cycle();
     braillify();
     clrscr();
     draw();
-    diff = clock() - start;
     refresh();
     copy_cycle();
-    reset_cycle();
     fprintf(stderr, "==============\n");
   }
   for (int i=0;i<row;i++)
   {
-    free(c_cycle[i]);
-    free(c_cycle[i]);
+    free(ccells[i]);
+    free(ccells[i]);
   }
 
   clear();
