@@ -117,6 +117,15 @@ add_user("11001110", L'\u286d');
 add_user("01011100", L'\u286e');
 add_user("11101110", L'\u286f');
 
+//temp while no internet
+add_user("10101000", L'\u28ff');
+add_user("01101010", L'\u28ff');
+add_user("10110101", L'\u28ff');
+add_user("01111011", L'\u28ff');
+add_user("11001011", L'\u28ff');
+add_user("11110110", L'\u28ff');
+add_user("01110110", L'\u28ff');
+
 add_user("00010110", L'\u2870');
 add_user("10010110", L'\u2871');
 add_user("00110110", L'\u2872');
