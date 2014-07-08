@@ -108,24 +108,12 @@ void draw()
   {
     for (int j=0; j<col; j++)
     {
-      //mvprintw(i,j, "%lc", find_user(blocks[i][j].bit)->name);
       if (ccells[i][j].alive)
       {
         int b = countblock_alive(i,j);
         if (b == 3 || b == 2)
           ncells[i][j].alive = true;
       }
-    }
-  }
-}
-
-void clrscr()
-{
-  for (int i=0; i<brow; i++)
-  {
-    for (int j=0; j<bcol; j++)
-    {
-      mvprintw(i,j, "%s"," ");
     }
   }
 }
@@ -255,23 +243,16 @@ int main(int argc, char** argv)
   while(1)
   {
   for (int i=0;i<row;i++)
-  {
-    ccells[i][5].alive = true;
-    ccells[i][col/4].alive = true;
-    ccells[i][col/3].alive = true;
-    ccells[i][col/2].alive = true;
-    ccells[i][col-5].alive = true;
-  }
+    ccells[i][0].alive = true;
+  for (int i=0;i<row;i++)
+    ccells[i][col-2].alive = true;
   for (int i=0;i<col;i++)
-  {
-    ccells[5][i].alive = true;
-    ccells[row/3][i].alive = true;
-    ccells[row/4][i].alive = true;
+    ccells[0][i].alive = true;
+  for (int i=0;i<col;i++)
     ccells[row-5][i].alive = true;
-  }
+
     reset_cycle();
     braillify();
-    clrscr();
     draw();
     refresh();
     copy_cycle();
