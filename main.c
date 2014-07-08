@@ -257,8 +257,17 @@ int main(int argc, char** argv)
   for (int i=0;i<row;i++)
   {
     ccells[i][5].alive = true;
+    ccells[i][col/4].alive = true;
+    ccells[i][col/3].alive = true;
     ccells[i][col/2].alive = true;
     ccells[i][col-5].alive = true;
+  }
+  for (int i=0;i<col;i++)
+  {
+    ccells[5][i].alive = true;
+    ccells[row/3][i].alive = true;
+    ccells[row/4][i].alive = true;
+    ccells[row-5][i].alive = true;
   }
     reset_cycle();
     braillify();
