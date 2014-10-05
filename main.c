@@ -225,8 +225,9 @@ int main(int argc, char** argv)
   curs_set(0);
   start_color();
   use_default_colors();
-  init_pair(1, COLOR_BLACK, COLOR_RED);
-  init_pair(2, COLOR_BLACK, COLOR_CYAN);
+  init_pair(1, COLOR_MAGENTA, -1);
+  init_pair(2, COLOR_GREEN, -1);
+  attron(COLOR_PAIR(1));
   cbreak();
   noecho();
   keypad(stdscr, TRUE);
@@ -239,18 +240,15 @@ int main(int argc, char** argv)
   gen_table();
   create();
 
-
   while(1)
   {
-  for (int i=0;i<row;i++)
-    ccells[i][0].alive = true;
-  for (int i=0;i<row;i++)
-    ccells[i][col-2].alive = true;
-  for (int i=0;i<col;i++)
-    ccells[0][i].alive = true;
-  for (int i=0;i<col;i++)
-    ccells[row-5][i].alive = true;
 
+    for (int c=0;c<col;c++)
+    {
+      int y = rand() % row;
+      int x = rand() % col;
+      ccells[y][x].alive = true;
+    }
     reset_cycle();
     braillify();
     draw();
