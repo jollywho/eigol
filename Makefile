@@ -2,13 +2,7 @@ CC=gcc
 CFLAGS=-c -g -std=c11 -Wall
 FFLAGS=-lncurses
 
-all: hi
+all: eigol
 
-hi:	main.o
-	$(CC) $(FFLAGS) main.o -o eigol
-
-main.o: main.c
-	$(CC) $(CFLAGS) main.c
-
-clean:
-	rm -rf *o hi
+eigol:
+	$(CC) $(FFLAGS) main.c -o eigol
